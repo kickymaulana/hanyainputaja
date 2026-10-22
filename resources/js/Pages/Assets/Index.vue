@@ -2,7 +2,7 @@
 import { Link, useForm, usePage } from '@inertiajs/vue3'
 import { ArrowLeft, Box, Edit3, Plus, Search } from '@lucide/vue'
 interface Related { id: number; name: string }
-interface Asset { id: number; asset_code: string; description: string; user_name: string | null; category: Related; location: Related; department: Related; status: Related; condition: Related }
+interface Asset { id: number; asset_code: string; description: string; user_name: string | null; category: Related; location: Related; assetFactory: Related | null; department: Related; position: Related | null; status: Related; condition: Related }
 const props = defineProps<{ assets: Asset[]; filters: { search: string } }>()
 const page = usePage<{ flash?: { success?: string }; auth: { user: { role: string } } }>()
 const canManageAssets = ['admin', 'operator'].includes(page.props.auth.user.role)

@@ -9,8 +9,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
-    'asset_code', 'category_id', 'description', 'location_id', 'department_id',
-    'user_name', 'user_position', 'asset_status_id', 'asset_condition_id',
+    'asset_code', 'category_id', 'description', 'location_id', 'factory_id', 'department_id',
+    'user_name', 'user_position', 'position_id', 'asset_status_id', 'asset_condition_id',
     'serial_number', 'brand', 'acquisition_date', 'notes',
 ])]
 class Asset extends Model
@@ -33,9 +33,19 @@ class Asset extends Model
         return $this->belongsTo(Location::class);
     }
 
+    public function assetFactory(): BelongsTo
+    {
+        return $this->belongsTo(Factory::class, 'factory_id');
+    }
+
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class);
+    }
+
+    public function position(): BelongsTo
+    {
+        return $this->belongsTo(Position::class);
     }
 
     public function status(): BelongsTo

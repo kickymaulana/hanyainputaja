@@ -7,7 +7,9 @@ use App\Models\AssetCondition;
 use App\Models\AssetStatus;
 use App\Models\Category;
 use App\Models\Department;
+use App\Models\Factory as FactoryModel;
 use App\Models\Location;
+use App\Models\Position;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /** @extends Factory<Asset> */
@@ -22,9 +24,11 @@ class AssetFactory extends Factory
             'category_id' => Category::factory(),
             'description' => fake()->sentence(),
             'location_id' => Location::factory(),
+            'factory_id' => FactoryModel::factory(),
             'department_id' => Department::factory(),
             'user_name' => fake()->name(),
             'user_position' => fake()->jobTitle(),
+            'position_id' => Position::factory(),
             'asset_status_id' => AssetStatus::factory(),
             'asset_condition_id' => AssetCondition::factory(),
             'serial_number' => fake()->optional()->bothify('SN-########'),

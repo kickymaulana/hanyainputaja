@@ -5,7 +5,9 @@ import { ArrowLeft, Building2, ClipboardCheck, Layers3, MapPin, Settings2 } from
 interface Counts {
   categories: number
   locations: number
+  factories: number
   departments: number
+  positions: number
   statuses: number
   conditions: number
 }
@@ -15,7 +17,9 @@ defineProps<{ counts: Counts }>()
 const masters = [
   { key: 'categories', title: 'Kategori Aset', description: 'Jenis atau kelompok aset', route: 'categories.index', icon: Layers3 },
   { key: 'locations', title: 'Lokasi Aset', description: 'Area atau tempat aset berada', route: 'locations.index', icon: MapPin },
+  { key: 'factories', title: 'Pabrik', description: 'Pabrik atau unit aset berada', route: 'factories.index', icon: Building2 },
   { key: 'departments', title: 'Departemen', description: 'Departemen pengguna aset', route: 'departments.index', icon: Building2 },
+  { key: 'positions', title: 'Jabatan', description: 'Jabatan pengguna aset', route: 'positions.index', icon: ClipboardCheck },
   { key: 'statuses', title: 'Status Aset', description: 'Status penggunaan aset', route: 'asset-statuses.index', icon: Settings2 },
   { key: 'conditions', title: 'Kondisi Aset', description: 'Kondisi fisik aset', route: 'asset-conditions.index', icon: ClipboardCheck },
 ] as const

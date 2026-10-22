@@ -9,7 +9,9 @@ use App\Models\AssetCondition;
 use App\Models\AssetStatus;
 use App\Models\Category;
 use App\Models\Department;
+use App\Models\Factory;
 use App\Models\Location;
+use App\Models\Position;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -23,7 +25,7 @@ class AssetController extends Controller
 
         return Inertia::render('Assets/Index', [
             'assets' => Asset::query()
-                ->with(['category:id,name', 'location:id,name', 'department:id,name', 'status:id,name', 'condition:id,name'])
+                ->with(['category:id,name', 'location:id,name', 'assetFactory:id,name', 'department:id,name', 'position:id,name', 'status:id,name', 'condition:id,name'])
                 ->when($search !== '', fn ($query) => $query->where(function ($query) use ($search): void {
                     $query->where('asset_code', 'like', "%{$search}%")
                         ->orWhere('description', 'like', "%{$search}%")
@@ -50,7 +52,7 @@ class AssetController extends Controller
     public function show(Asset $asset): Response
     {
         return Inertia::render('Assets/Show', [
-            'asset' => $asset->load(['category', 'location', 'department', 'status', 'condition']),
+            'asset' => $asset->load(['category', 'location', 'assetFactory', 'department', 'position', 'status', 'condition']),
         ]);
     }
 
@@ -75,7 +77,9 @@ class AssetController extends Controller
         return [
             'categories' => Category::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
             'locations' => Location::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
+            'factories' => Factory::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
             'departments' => Department::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
+            'positions' => Position::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
             'statuses' => AssetStatus::query()->where('is_active', true)->where('name', '!=', 'Dihapuskan')->orderBy('id')->get(['id', 'name']),
             'conditions' => AssetCondition::query()->where('is_active', true)->orderBy('id')->get(['id', 'name']),
         ];
