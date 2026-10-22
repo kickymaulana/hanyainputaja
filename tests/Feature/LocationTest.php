@@ -33,7 +33,7 @@ class LocationTest extends TestCase
         $response->assertRedirect('/locations');
         $this->assertDatabaseHas('locations', [
             'name' => 'GUDANG',
-            'description' => 'Area penyimpanan',
+            'description' => 'AREA PENYIMPANAN',
             'is_active' => 1,
         ]);
     }

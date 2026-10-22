@@ -2,9 +2,7 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
-
-class StoreDepartmentRequest extends FormRequest
+class StoreDepartmentRequest extends UppercaseFormRequest
 {
     public function authorize(): bool
     {

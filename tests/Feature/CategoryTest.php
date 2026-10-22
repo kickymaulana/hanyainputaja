@@ -33,7 +33,7 @@ class CategoryTest extends TestCase
         $response->assertRedirect('/categories');
         $this->assertDatabaseHas('categories', [
             'name' => 'SERVER',
-            'description' => 'Server backup',
+            'description' => 'SERVER BACKUP',
             'is_active' => 1,
         ]);
     }

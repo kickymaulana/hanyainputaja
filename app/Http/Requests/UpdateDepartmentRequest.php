@@ -2,10 +2,9 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class UpdateDepartmentRequest extends FormRequest
+class UpdateDepartmentRequest extends UppercaseFormRequest
 {
     public function authorize(): bool
     {

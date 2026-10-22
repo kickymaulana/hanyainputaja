@@ -2,35 +2,12 @@
 import { computed } from 'vue'
 import { Link, router } from '@inertiajs/vue3'
 import { Box, ClipboardList, Home, LayoutGrid, LogOut, Plus, UserRound } from '@lucide/vue'
-
 interface User { name: string; role: 'admin' | 'operator' | 'viewer' }
-interface Summary { total: number; used: number; available: number; repair: number }
+interface Summary { total: number }
 const props = defineProps<{ user: User; summary: Summary }>()
 const canManageAssets = computed(() => ['admin', 'operator'].includes(props.user.role))
 const canManageMaster = computed(() => props.user.role === 'admin')
-const navigation = computed(() => [
-  { label: 'Beranda', href: route('dashboard'), icon: Home, active: true },
-  { label: 'Aset', href: route('assets.index'), icon: Box, active: false },
-  ...(canManageAssets.value ? [{ label: 'Tambah', href: route('assets.create'), icon: Plus, active: false, prominent: true }] : []),
-  ...(canManageMaster.value ? [{ label: 'Master', href: route('master.index'), icon: LayoutGrid, active: false }] : []),
-  { label: 'Akun', href: route('account.index'), icon: UserRound, active: false },
-])
+const navigation = computed(() => [{ label: 'Beranda', href: route('dashboard'), icon: Home, active: true }, { label: 'Aset', href: route('assets.index'), icon: Box, active: false }, ...(canManageAssets.value ? [{ label: 'Tambah', href: route('assets.create'), icon: Plus, active: false, prominent: true }] : []), ...(canManageMaster.value ? [{ label: 'Master', href: route('master.index'), icon: LayoutGrid, active: false }] : []), { label: 'Akun', href: route('account.index'), icon: UserRound, active: false }])
 function logout(): void { router.post(route('logout')) }
 </script>
-
-<template>
-  <div class="min-h-screen pb-24">
-    <header class="sticky top-0 z-10 border-b bg-white/90 px-4 py-4 backdrop-blur">
-      <div class="mx-auto flex max-w-3xl items-center justify-between">
-        <div><p class="text-xs font-medium uppercase tracking-wider text-primary">Inventaris Pabrik</p><h1 class="text-xl font-bold tracking-tight">Hanya Input Aja</h1></div>
-        <div class="flex items-center gap-2"><div class="hidden text-right sm:block"><p class="text-sm font-semibold">{{ user.name }}</p><p class="text-xs capitalize text-muted-foreground">{{ user.role }}</p></div><button type="button" class="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary" title="Keluar" @click="logout"><LogOut class="size-4" /></button></div>
-      </div>
-    </header>
-    <main class="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-6">
-      <section class="rounded-3xl bg-primary p-5 text-primary-foreground shadow-lg shadow-primary/15"><p class="text-sm opacity-80">Selamat datang, {{ user.name }}</p><h2 class="mt-1 text-2xl font-bold">Siap mencatat aset hari ini?</h2><Link v-if="canManageAssets" :href="route('assets.create')" class="mt-5 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-primary shadow-sm"><Plus class="size-4" />Tambah aset</Link><p v-else class="mt-3 text-sm opacity-80">Mode lihat aktif. Hubungi Admin jika perlu perubahan data.</p></section>
-      <section><div class="mb-3 flex items-center justify-between"><h2 class="font-semibold">Ringkasan aset</h2><ClipboardList class="size-5 text-muted-foreground" /></div><div class="grid grid-cols-2 gap-3 sm:grid-cols-4"><div v-for="item in [{ label: 'Total aset', value: summary.total }, { label: 'Digunakan', value: summary.used }, { label: 'Tersedia', value: summary.available }, { label: 'Perbaikan', value: summary.repair }]" :key="item.label" class="rounded-2xl border bg-card p-4"><p class="text-xs text-muted-foreground">{{ item.label }}</p><p class="mt-2 text-2xl font-bold">{{ item.value }}</p></div></div></section>
-      <section class="rounded-2xl border border-dashed bg-card p-6 text-center"><Box class="mx-auto size-10 text-muted-foreground/60" /><h2 class="mt-3 font-semibold">Belum ada data aset</h2><p class="mt-1 text-sm text-muted-foreground">Data aset yang kamu input akan muncul di sini.</p></section>
-    </main>
-    <nav class="fixed inset-x-0 bottom-0 z-20 border-t bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] pt-2 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] backdrop-blur"><div class="mx-auto flex max-w-3xl items-end justify-around"><Link v-for="item in navigation" :key="item.label" :href="item.href" class="flex min-w-14 flex-col items-center gap-1 rounded-xl px-2 py-1.5 text-[11px]" :class="item.active ? 'font-semibold text-primary' : 'text-muted-foreground'"><span :class="item.prominent ? 'flex size-11 -translate-y-4 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30' : ''"><component :is="item.icon" class="size-5" /></span><span>{{ item.label }}</span></Link></div></nav>
-  </div>
-</template>
+<template><div class="min-h-screen pb-24"><header class="sticky top-0 z-10 border-b bg-white/90 px-4 py-4 backdrop-blur"><div class="mx-auto flex max-w-3xl items-center justify-between"><div><p class="text-xs font-medium uppercase tracking-wider text-primary">Inventaris</p><h1 class="text-xl font-bold tracking-tight">Hanya Input Aja</h1></div><div class="flex items-center gap-2"><div class="hidden text-right sm:block"><p class="text-sm font-semibold">{{ user.name }}</p><p class="text-xs capitalize text-muted-foreground">{{ user.role }}</p></div><button type="button" class="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary" title="Keluar" @click="logout"><LogOut class="size-4" /></button></div></div></header><main class="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-6"><section class="rounded-3xl bg-primary p-5 text-primary-foreground shadow-lg shadow-primary/15"><p class="text-sm opacity-80">Selamat datang, {{ user.name }}</p><h2 class="mt-1 text-2xl font-bold">Siap mencatat aset hari ini?</h2><Link v-if="canManageAssets" :href="route('assets.create')" class="mt-5 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-primary shadow-sm"><Plus class="size-4" />Tambah aset</Link><p v-else class="mt-3 text-sm opacity-80">Mode lihat aktif. Hubungi Admin jika perlu perubahan data.</p></section><section><div class="mb-3 flex items-center justify-between"><h2 class="font-semibold">Ringkasan aset</h2><ClipboardList class="size-5 text-muted-foreground" /></div><div class="grid grid-cols-1 gap-3"><div class="rounded-2xl border bg-card p-4"><p class="text-xs text-muted-foreground">Total aset</p><p class="mt-2 text-2xl font-bold">{{ summary.total }}</p></div></div></section><section class="rounded-2xl border border-dashed bg-card p-6 text-center"><Box class="mx-auto size-10 text-muted-foreground/60" /><h2 class="mt-3 font-semibold">Belum ada data aset</h2><p class="mt-1 text-sm text-muted-foreground">Data aset yang kamu input akan muncul di sini.</p></section></main><nav class="fixed inset-x-0 bottom-0 z-20 border-t bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] pt-2 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] backdrop-blur"><div class="mx-auto flex max-w-3xl items-end justify-around"><Link v-for="item in navigation" :key="item.label" :href="item.href" class="flex min-w-14 flex-col items-center gap-1 rounded-xl px-2 py-1.5 text-[11px]" :class="item.active ? 'font-semibold text-primary' : 'text-muted-foreground'"><span :class="item.prominent ? 'flex size-11 -translate-y-4 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30' : ''"><component :is="item.icon" class="size-5" /></span><span>{{ item.label }}</span></Link></div></nav></div></template>

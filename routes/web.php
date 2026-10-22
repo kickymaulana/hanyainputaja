@@ -2,15 +2,16 @@
 
 use App\Http\Controllers\AssetConditionController;
 use App\Http\Controllers\AssetController;
-use App\Http\Controllers\AssetStatusController;
 use App\Http\Controllers\AuthenticatedSessionController;
+use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
-use App\Http\Controllers\FactoryController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\MasterDataController;
+use App\Http\Controllers\MemoryController;
 use App\Http\Controllers\PositionController;
+use App\Http\Controllers\ProcessorController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function (): void {
@@ -39,10 +40,11 @@ Route::middleware('auth')->group(function (): void {
         Route::resource('categories', CategoryController::class)->except(['show', 'destroy']);
         Route::resource('locations', LocationController::class)->except(['show', 'destroy']);
         Route::resource('departments', DepartmentController::class)->except(['show', 'destroy']);
-        Route::resource('factories', FactoryController::class)->except(['show', 'destroy']);
         Route::resource('positions', PositionController::class)->except(['show', 'destroy']);
-        Route::resource('asset-statuses', AssetStatusController::class)->except(['show', 'destroy']);
         Route::resource('asset-conditions', AssetConditionController::class)->except(['show', 'destroy']);
+        Route::resource('brands', BrandController::class)->except(['show', 'destroy']);
+        Route::resource('processors', ProcessorController::class)->except(['show', 'destroy']);
+        Route::resource('memories', MemoryController::class)->except(['show', 'destroy']);
     });
 
     Route::get('/master', MasterDataController::class)->middleware('role:admin')->name('master.index');

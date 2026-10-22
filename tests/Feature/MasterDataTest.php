@@ -20,8 +20,10 @@ class MasterDataTest extends TestCase
                 ->has('counts.categories')
                 ->has('counts.locations')
                 ->has('counts.departments')
-                ->has('counts.statuses')
-                ->has('counts.conditions'));
+                ->has('counts.conditions')
+                ->has('counts.brands')
+                ->has('counts.processors')
+                ->has('counts.memories'));
     }
 
     public function test_non_admin_cannot_view_master_data_hub(): void

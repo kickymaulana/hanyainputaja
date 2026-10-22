@@ -4,12 +4,13 @@ namespace Database\Factories;
 
 use App\Models\Asset;
 use App\Models\AssetCondition;
-use App\Models\AssetStatus;
+use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Department;
-use App\Models\Factory as FactoryModel;
 use App\Models\Location;
+use App\Models\Memory;
 use App\Models\Position;
+use App\Models\Processor;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /** @extends Factory<Asset> */
@@ -20,19 +21,17 @@ class AssetFactory extends Factory
     public function definition(): array
     {
         return [
-            'asset_code' => fake()->unique()->bothify('AST-####'),
             'category_id' => Category::factory(),
             'description' => fake()->sentence(),
             'location_id' => Location::factory(),
-            'factory_id' => FactoryModel::factory(),
             'department_id' => Department::factory(),
+            'brand_id' => Brand::factory(),
+            'processor_id' => Processor::factory(),
+            'memory_id' => Memory::factory(),
             'user_name' => fake()->name(),
-            'user_position' => fake()->jobTitle(),
             'position_id' => Position::factory(),
-            'asset_status_id' => AssetStatus::factory(),
             'asset_condition_id' => AssetCondition::factory(),
             'serial_number' => fake()->optional()->bothify('SN-########'),
-            'brand' => fake()->optional()->company(),
             'acquisition_date' => fake()->optional()->date(),
             'notes' => fake()->optional()->sentence(),
         ];
