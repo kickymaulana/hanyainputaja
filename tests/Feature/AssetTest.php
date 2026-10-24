@@ -90,6 +90,26 @@ class AssetTest extends TestCase
                 ->where('filters.asset_condition_id', $condition->id));
     }
 
+    public function test_assets_can_be_filtered_by_location_and_department(): void
+    {
+        $location = Location::factory()->create(['name' => 'KANTOR PUSAT']);
+        $department = Department::factory()->create(['name' => 'TEKNOLOGI INFORMASI']);
+        $matching = Asset::factory()->create([
+            'location_id' => $location->id,
+            'department_id' => $department->id,
+        ]);
+        Asset::factory()->create();
+
+        $this->get('/assets?location_id='.$location->id.'&department_id='.$department->id)
+            ->assertInertia(fn ($page) => $page
+                ->has('assets', 1)
+                ->where('assets.0.id', $matching->id)
+                ->where('filters.location_id', $location->id)
+                ->where('filters.department_id', $department->id)
+                ->has('locations')
+                ->has('departments'));
+    }
+
     public function test_asset_can_be_updated(): void
     {
         $asset = Asset::factory()->create();

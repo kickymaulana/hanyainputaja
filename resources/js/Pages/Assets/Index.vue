@@ -1,12 +1,112 @@
 <script setup lang="ts">
 import { Link, useForm, usePage } from '@inertiajs/vue3'
 import { ArrowLeft, Box, Edit3, Plus, Search } from '@lucide/vue'
+
 interface Related { id: number; name: string }
-interface Asset { id: number; description: string; user_name: string | null; category: Related; location: Related; department: Related; brand: Related | null; processor: Related | null; memory: Related | null; position: Related | null; condition: Related }
-const props = defineProps<{ assets: Asset[]; filters: { search: string } }>()
+interface Asset {
+    id: number
+    description: string
+    user_name: string | null
+    category: Related
+    location: Related
+    department: Related
+    brand: Related | null
+    processor: Related | null
+    memory: Related | null
+    position: Related | null
+    condition: Related
+}
+interface FilterOptions { id: number; name: string }
+interface Filters {
+    search: string
+    category_id: number | null
+    location_id: number | null
+    department_id: number | null
+    asset_condition_id: number | null
+}
+
+const props = defineProps<{
+    assets: Asset[]
+    categories: FilterOptions[]
+    locations: FilterOptions[]
+    departments: FilterOptions[]
+    conditions: FilterOptions[]
+    filters: Filters
+}>()
 const page = usePage<{ flash?: { success?: string }; auth: { user: { role: string } } }>()
 const canManageAssets = ['admin', 'operator'].includes(page.props.auth.user.role)
-const form = useForm({ search: props.filters.search ?? '' })
-function search(): void { form.get(route('assets.index'), { preserveState: true, replace: true }) }
+const form = useForm({
+    search: props.filters.search ?? '',
+    category_id: props.filters.category_id ?? '',
+    location_id: props.filters.location_id ?? '',
+    department_id: props.filters.department_id ?? '',
+    asset_condition_id: props.filters.asset_condition_id ?? '',
+})
+
+function search(): void {
+    form.get(route('assets.index'), { preserveState: true, replace: true })
+}
+
+function resetFilters(): void {
+    form.reset()
+    search()
+}
 </script>
-<template><div class="min-h-screen pb-8"><header class="sticky top-0 z-10 border-b bg-white/95 px-4 py-4 backdrop-blur"><div class="mx-auto flex max-w-3xl items-center justify-between"><div class="flex items-center gap-3"><Link :href="route('dashboard')" class="rounded-xl p-2 text-muted-foreground"><ArrowLeft class="size-5" /></Link><div><p class="text-xs uppercase tracking-wider text-primary">Inventaris</p><h1 class="text-xl font-bold">Daftar Aset</h1></div></div><Link v-if="canManageAssets" :href="route('assets.create')" class="flex size-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg"><Plus class="size-5" /></Link></div></header><main class="mx-auto max-w-3xl space-y-4 px-4 py-6"><div v-if="page.props.flash?.success" class="rounded-2xl bg-green-50 p-4 text-sm font-medium text-green-700">{{ page.props.flash.success }}</div><form class="flex gap-2" @submit.prevent="search"><div class="relative flex-1"><Search class="absolute left-3 top-3 size-5 text-muted-foreground" /><input v-model="form.search" class="w-full rounded-xl border bg-card py-3 pl-10 pr-4" placeholder="Cari deskripsi, pengguna, nomor seri"></div><button class="rounded-xl bg-primary px-4 font-semibold text-primary-foreground">Cari</button></form><div v-if="assets.length" class="space-y-3"><Link v-for="asset in assets" :key="asset.id" :href="route('assets.show', asset.id)" class="block rounded-2xl border bg-card p-4 shadow-sm"><div class="flex items-start justify-between gap-3"><div class="flex min-w-0 gap-3"><div class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><Box class="size-5" /></div><div class="min-w-0"><h2 class="font-semibold">{{ asset.category.name }}</h2><p class="mt-1 line-clamp-2 text-sm text-muted-foreground">{{ asset.description }}</p></div></div><Edit3 v-if="canManageAssets" class="size-4 shrink-0 text-muted-foreground" /></div><div class="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground"><span>{{ asset.location.name }}</span><span>·</span><span>{{ asset.department.name }}</span><span v-if="asset.brand">· {{ asset.brand.name }}</span></div></Link></div><div v-else class="rounded-2xl border border-dashed p-8 text-center text-sm text-muted-foreground">Belum ada aset.</div></main></div></template>
+
+<template>
+    <div class="min-h-screen pb-8">
+        <header class="sticky top-0 z-10 border-b bg-white/95 px-4 py-4 backdrop-blur">
+            <div class="mx-auto flex max-w-3xl items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <Link :href="route('dashboard')" class="rounded-xl p-2 text-muted-foreground"><ArrowLeft class="size-5" /></Link>
+                    <div><p class="text-xs uppercase tracking-wider text-primary">Inventaris</p><h1 class="text-xl font-bold">Daftar Aset</h1></div>
+                </div>
+                <Link v-if="canManageAssets" :href="route('assets.create')" class="flex size-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg"><Plus class="size-5" /></Link>
+            </div>
+        </header>
+
+        <main class="mx-auto max-w-3xl space-y-4 px-4 py-6">
+            <div v-if="page.props.flash?.success" class="rounded-2xl bg-green-50 p-4 text-sm font-medium text-green-700">{{ page.props.flash.success }}</div>
+
+            <form class="space-y-3 rounded-2xl border bg-card p-4 shadow-sm" @submit.prevent="search">
+                <div class="flex gap-2">
+                    <div class="relative flex-1">
+                        <Search class="absolute left-3 top-3 size-5 text-muted-foreground" />
+                        <input v-model="form.search" class="w-full rounded-xl border bg-card py-3 pl-10 pr-4" placeholder="Cari deskripsi, pengguna, nomor seri">
+                    </div>
+                    <button class="rounded-xl bg-primary px-4 font-semibold text-primary-foreground">Cari</button>
+                </div>
+                <div class="grid gap-3 sm:grid-cols-2">
+                    <select v-model="form.category_id" class="rounded-xl border bg-card px-3 py-3 text-sm">
+                        <option value="">Semua kategori</option>
+                        <option v-for="option in categories" :key="option.id" :value="option.id">{{ option.name }}</option>
+                    </select>
+                    <select v-model="form.location_id" class="rounded-xl border bg-card px-3 py-3 text-sm">
+                        <option value="">Semua lokasi</option>
+                        <option v-for="option in locations" :key="option.id" :value="option.id">{{ option.name }}</option>
+                    </select>
+                    <select v-model="form.department_id" class="rounded-xl border bg-card px-3 py-3 text-sm">
+                        <option value="">Semua departemen</option>
+                        <option v-for="option in departments" :key="option.id" :value="option.id">{{ option.name }}</option>
+                    </select>
+                    <select v-model="form.asset_condition_id" class="rounded-xl border bg-card px-3 py-3 text-sm">
+                        <option value="">Semua kondisi</option>
+                        <option v-for="option in conditions" :key="option.id" :value="option.id">{{ option.name }}</option>
+                    </select>
+                </div>
+                <button type="button" class="text-sm font-medium text-muted-foreground underline" @click="resetFilters">Reset filter</button>
+            </form>
+
+            <div v-if="assets.length" class="space-y-3">
+                <Link v-for="asset in assets" :key="asset.id" :href="route('assets.show', asset.id)" class="block rounded-2xl border bg-card p-4 shadow-sm">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex min-w-0 gap-3"><div class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><Box class="size-5" /></div><div class="min-w-0"><h2 class="font-semibold">{{ asset.category.name }}</h2><p class="mt-1 line-clamp-2 text-sm text-muted-foreground">{{ asset.description }}</p></div></div>
+                        <Edit3 v-if="canManageAssets" class="size-4 shrink-0 text-muted-foreground" />
+                    </div>
+                    <div class="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground"><span>{{ asset.location.name }}</span><span>·</span><span>{{ asset.department.name }}</span><span v-if="asset.brand">· {{ asset.brand.name }}</span></div>
+                </Link>
+            </div>
+            <div v-else class="rounded-2xl border border-dashed p-8 text-center text-sm text-muted-foreground">Belum ada aset yang sesuai filter.</div>
+        </main>
+    </div>
+</template>

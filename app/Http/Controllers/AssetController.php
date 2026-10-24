@@ -27,6 +27,8 @@ class AssetController extends Controller
         $search = trim((string) $request->string('search'));
         $categoryId = $request->integer('category_id') ?: null;
         $conditionId = $request->integer('asset_condition_id') ?: null;
+        $locationId = $request->integer('location_id') ?: null;
+        $departmentId = $request->integer('department_id') ?: null;
 
         return Inertia::render('Assets/Index', [
             'assets' => Asset::query()
@@ -38,9 +40,21 @@ class AssetController extends Controller
                 }))
                 ->when($categoryId, fn ($query) => $query->where('category_id', $categoryId))
                 ->when($conditionId, fn ($query) => $query->where('asset_condition_id', $conditionId))
+                ->when($locationId, fn ($query) => $query->where('location_id', $locationId))
+                ->when($departmentId, fn ($query) => $query->where('department_id', $departmentId))
                 ->latest()
                 ->get(),
-            'filters' => ['search' => $search, 'category_id' => $categoryId, 'asset_condition_id' => $conditionId],
+            'categories' => Category::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
+            'locations' => Location::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
+            'departments' => Department::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
+            'conditions' => AssetCondition::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
+            'filters' => [
+                'search' => $search,
+                'category_id' => $categoryId,
+                'asset_condition_id' => $conditionId,
+                'location_id' => $locationId,
+                'department_id' => $departmentId,
+            ],
         ]);
     }
 
