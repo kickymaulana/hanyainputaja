@@ -26,6 +26,7 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/dashboard', DashboardController::class)->name('dashboard.index');
 
     Route::get('assets', [AssetController::class, 'index'])->name('assets.index');
+    Route::get('assets/{asset}/photo', [AssetController::class, 'photo'])->name('assets.photo');
 
     Route::middleware('role:admin,operator')->group(function (): void {
         Route::get('assets/create', [AssetController::class, 'create'])->name('assets.create');

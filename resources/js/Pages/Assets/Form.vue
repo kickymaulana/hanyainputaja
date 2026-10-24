@@ -4,14 +4,41 @@ import { Link, useForm } from '@inertiajs/vue3'
 import { ArrowLeft, ArrowRight, Save } from '@lucide/vue'
 
 interface Option { id: number; name: string }
-interface Asset { id: number; category_id: number; description: string; location_id: number; department_id: number; brand_id: number | null; processor_id: number | null; memory_id: number | null; user_name: string | null; position_id: number | null; asset_condition_id: number; serial_number: string | null; acquisition_date: string | null; notes: string | null }
+interface Asset { id: number; category_id: number; description: string; location_id: number; department_id: number; brand_id: number | null; processor_id: number | null; memory_id: number | null; user_name: string | null; position_id: number | null; asset_condition_id: number; serial_number: string | null; acquisition_date: string | null; notes: string | null; photo_path: string | null }
 const props = withDefaults(defineProps<{ asset?: Asset; categories: Option[]; locations: Option[]; departments: Option[]; brands: Option[]; processors: Option[]; memories: Option[]; positions: Option[]; conditions: Option[] }>(), { asset: undefined })
 const step = ref(1)
 const editing = Boolean(props.asset)
-const form = useForm({ category_id: props.asset?.category_id ?? '', description: props.asset?.description ?? '', location_id: props.asset?.location_id ?? '', department_id: props.asset?.department_id ?? '', brand_id: props.asset?.brand_id ?? '', processor_id: props.asset?.processor_id ?? '', memory_id: props.asset?.memory_id ?? '', user_name: props.asset?.user_name ?? '', position_id: props.asset?.position_id ?? '', asset_condition_id: props.asset?.asset_condition_id ?? '', serial_number: props.asset?.serial_number ?? '', acquisition_date: props.asset?.acquisition_date?.slice(0, 10) ?? '', notes: props.asset?.notes ?? '' })
+const form = useForm({ category_id: props.asset?.category_id ?? '', description: props.asset?.description ?? '', location_id: props.asset?.location_id ?? '', department_id: props.asset?.department_id ?? '', brand_id: props.asset?.brand_id ?? '', processor_id: props.asset?.processor_id ?? '', memory_id: props.asset?.memory_id ?? '', user_name: props.asset?.user_name ?? '', position_id: props.asset?.position_id ?? '', asset_condition_id: props.asset?.asset_condition_id ?? '', serial_number: props.asset?.serial_number ?? '', acquisition_date: props.asset?.acquisition_date?.slice(0, 10) ?? '', notes: props.asset?.notes ?? '', photo: null as File | null })
+const photoPreview = ref<string | null>(props.asset?.photo_path ? route('assets.photo', props.asset.id) : null)
 const progress = computed(() => `${Math.round((step.value / 3) * 100)}%`)
 function uppercase(field: 'description' | 'user_name' | 'serial_number' | 'notes'): void { form[field] = form[field].toUpperCase() }
-function submit(): void { if (editing && props.asset) form.put(route('assets.update', props.asset.id)); else form.post(route('assets.store')) }
+async function compressPhoto(file: File): Promise<File> {
+    const source = await createImageBitmap(file)
+    const maxDimension = 1600
+    const scale = Math.min(1, maxDimension / Math.max(source.width, source.height))
+    const canvas = document.createElement('canvas')
+    canvas.width = Math.max(1, Math.round(source.width * scale))
+    canvas.height = Math.max(1, Math.round(source.height * scale))
+    canvas.getContext('2d')?.drawImage(source, 0, 0, canvas.width, canvas.height)
+    source.close()
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.82))
+    if (!blob) throw new Error('Foto tidak dapat dikompres.')
+    return new File([blob], `${file.name.replace(/\.[^.]+$/, '')}.jpg`, { type: 'image/jpeg' })
+}
+async function choosePhoto(event: Event): Promise<void> {
+    const file = (event.target as HTMLInputElement).files?.[0]
+    if (!file) return
+    try {
+        form.clearErrors('photo')
+        form.photo = await compressPhoto(file)
+        photoPreview.value = URL.createObjectURL(form.photo)
+    } catch {
+        form.setError('photo', 'Foto gagal diproses. Silakan pilih foto lain.')
+    }
+}
+function submit(): void {
+    form.transform((data) => ({ ...data, ...(editing ? { _method: 'put' } : {}) })).post(editing && props.asset ? route('assets.update', props.asset.id) : route('assets.store'), { forceFormData: true })
+}
 </script>
 
 <template>
@@ -35,6 +62,7 @@ function submit(): void { if (editing && props.asset) form.put(route('assets.upd
 
         <div><label class="mb-2 block text-sm font-medium">Tanggal perolehan</label><input v-model="form.acquisition_date" type="date" class="w-full rounded-xl border px-4 py-3"></div>
         <div><label class="mb-2 block text-sm font-medium">Catatan</label><textarea v-model="form.notes" rows="4" class="w-full rounded-xl border px-4 py-3" @input="uppercase('notes')"></textarea></div>
+        <div><label class="mb-2 block text-sm font-medium">Foto aset <span class="font-normal text-muted-foreground">(opsional)</span></label><input type="file" accept="image/jpeg,image/png,image/webp" class="w-full rounded-xl border px-4 py-3 text-sm" @change="choosePhoto"><p class="mt-1 text-xs text-muted-foreground">Foto dikompres di browser sebelum diunggah.</p><p v-if="form.errors.photo" class="mt-1 text-sm text-red-600">{{ form.errors.photo }}</p><img v-if="photoPreview" :src="photoPreview" alt="Pratinjau foto aset" class="mt-3 max-h-56 w-full rounded-2xl object-contain bg-muted p-2"></div>
       </section>
       <div class="mt-6 flex gap-3"><button v-if="step > 1" type="button" class="flex flex-1 items-center justify-center gap-2 rounded-xl border px-4 py-3 font-semibold" @click="step--"><ArrowLeft class="size-4" />Kembali</button><button v-if="step < 3" type="button" class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 font-semibold text-primary-foreground" @click="step++">Lanjut<ArrowRight class="size-4" /></button><button v-else type="submit" :disabled="form.processing" class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 font-semibold text-primary-foreground"><Save class="size-4" />{{ form.processing ? 'Menyimpan...' : 'Simpan aset' }}</button></div>
     </form></main>

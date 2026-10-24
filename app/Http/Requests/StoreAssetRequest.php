@@ -27,6 +27,7 @@ class StoreAssetRequest extends UppercaseFormRequest
             'serial_number' => ['nullable', 'string', 'max:150'],
             'acquisition_date' => ['nullable', 'date'],
             'notes' => ['nullable', 'string', 'max:2000'],
+            'photo' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120'],
         ];
     }
 }

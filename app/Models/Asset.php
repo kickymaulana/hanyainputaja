@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
     'category_id', 'description', 'location_id', 'department_id', 'brand_id', 'processor_id', 'memory_id',
-    'user_name', 'position_id', 'asset_condition_id', 'serial_number', 'acquisition_date', 'notes',
+    'user_name', 'position_id', 'asset_condition_id', 'serial_number', 'acquisition_date', 'notes', 'photo_path',
 ])]
 class Asset extends Model
 {

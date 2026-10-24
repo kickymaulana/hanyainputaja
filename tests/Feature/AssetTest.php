@@ -12,6 +12,8 @@ use App\Models\Memory;
 use App\Models\Processor;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class AssetTest extends TestCase
@@ -96,6 +98,19 @@ class AssetTest extends TestCase
 
         $this->put('/assets/'.$asset->id, $data)->assertRedirect('/assets/'.$asset->id);
         $this->assertDatabaseHas('assets', ['id' => $asset->id, 'description' => 'UPDATED ASSET']);
+    }
+
+    public function test_asset_photo_is_stored_on_s3_disk(): void
+    {
+        Storage::fake('s3');
+        $data = $this->validAssetData();
+        $data['photo'] = UploadedFile::fake()->image('asset.jpg', 1200, 800);
+
+        $this->post('/assets', $data)->assertRedirect();
+        $asset = Asset::query()->firstOrFail();
+
+        $this->assertNotNull($asset->photo_path);
+        Storage::disk('s3')->assertExists($asset->photo_path);
     }
 
     public function test_admin_can_delete_an_asset(): void

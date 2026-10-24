@@ -15,6 +15,8 @@ use App\Models\Position;
 use App\Models\Processor;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -49,7 +51,13 @@ class AssetController extends Controller
 
     public function store(StoreAssetRequest $request): RedirectResponse
     {
-        $asset = Asset::query()->create($request->validated());
+        $validated = $request->validated();
+        unset($validated['photo']);
+        $asset = Asset::query()->create($validated);
+
+        if ($request->hasFile('photo')) {
+            $asset->update(['photo_path' => $this->storePhoto($request)]);
+        }
 
         return to_route('assets.show', $asset)->with('success', 'Aset berhasil ditambahkan.');
     }
@@ -68,16 +76,49 @@ class AssetController extends Controller
 
     public function update(UpdateAssetRequest $request, Asset $asset): RedirectResponse
     {
-        $asset->update($request->validated());
+        $validated = $request->validated();
+        unset($validated['photo']);
+        $asset->update($validated);
+
+        if ($request->hasFile('photo')) {
+            $this->deletePhoto($asset->photo_path);
+            $asset->update(['photo_path' => $this->storePhoto($request)]);
+        }
 
         return to_route('assets.show', $asset)->with('success', 'Aset berhasil diperbarui.');
     }
 
     public function destroy(Asset $asset): RedirectResponse
     {
+        $this->deletePhoto($asset->photo_path);
         $asset->delete();
 
         return to_route('assets.index')->with('success', 'Aset berhasil dihapus.');
+    }
+
+    public function photo(Asset $asset): mixed
+    {
+        abort_unless($asset->photo_path, 404);
+
+        $disk = Storage::disk('s3');
+        abort_unless($disk->exists($asset->photo_path), 404);
+
+        return response($disk->get($asset->photo_path), 200, [
+            'Content-Type' => $disk->mimeType($asset->photo_path) ?: 'image/jpeg',
+            'Cache-Control' => 'private, max-age=3600',
+        ]);
+    }
+
+    private function storePhoto(StoreAssetRequest|UpdateAssetRequest $request): string
+    {
+        return $request->file('photo')->storeAs('asset-photos', Str::uuid().'.'.$request->file('photo')->extension(), 's3');
+    }
+
+    private function deletePhoto(?string $path): void
+    {
+        if ($path) {
+            Storage::disk('s3')->delete($path);
+        }
     }
 
     /** @return array<string, mixed> */
