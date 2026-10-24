@@ -23,6 +23,8 @@ class AssetController extends Controller
     public function index(Request $request): Response
     {
         $search = trim((string) $request->string('search'));
+        $categoryId = $request->integer('category_id') ?: null;
+        $conditionId = $request->integer('asset_condition_id') ?: null;
 
         return Inertia::render('Assets/Index', [
             'assets' => Asset::query()
@@ -32,9 +34,11 @@ class AssetController extends Controller
                         ->orWhere('user_name', 'like', "%{$search}%")
                         ->orWhere('serial_number', 'like', "%{$search}%");
                 }))
+                ->when($categoryId, fn ($query) => $query->where('category_id', $categoryId))
+                ->when($conditionId, fn ($query) => $query->where('asset_condition_id', $conditionId))
                 ->latest()
                 ->get(),
-            'filters' => ['search' => $search],
+            'filters' => ['search' => $search, 'category_id' => $categoryId, 'asset_condition_id' => $conditionId],
         ]);
     }
 

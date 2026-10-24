@@ -72,6 +72,21 @@ class AssetTest extends TestCase
         $this->get('/assets?search=SERVER')->assertInertia(fn ($page) => $page->has('assets', 1)->where('assets.0.serial_number', 'SN-SERVER'));
     }
 
+    public function test_assets_can_be_filtered_by_category_and_condition(): void
+    {
+        $category = Category::factory()->create(['name' => 'KOMPUTER']);
+        $condition = AssetCondition::factory()->create(['name' => 'BAIK']);
+        $matching = Asset::factory()->create(['category_id' => $category->id, 'asset_condition_id' => $condition->id]);
+        Asset::factory()->create();
+
+        $this->get('/assets?category_id='.$category->id.'&asset_condition_id='.$condition->id)
+            ->assertInertia(fn ($page) => $page
+                ->has('assets', 1)
+                ->where('assets.0.id', $matching->id)
+                ->where('filters.category_id', $category->id)
+                ->where('filters.asset_condition_id', $condition->id));
+    }
+
     public function test_asset_can_be_updated(): void
     {
         $asset = Asset::factory()->create();
