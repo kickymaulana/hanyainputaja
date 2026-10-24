@@ -10,6 +10,7 @@ use App\Models\Department;
 use App\Models\Location;
 use App\Models\Memory;
 use App\Models\Processor;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -95,6 +96,27 @@ class AssetTest extends TestCase
 
         $this->put('/assets/'.$asset->id, $data)->assertRedirect('/assets/'.$asset->id);
         $this->assertDatabaseHas('assets', ['id' => $asset->id, 'description' => 'UPDATED ASSET']);
+    }
+
+    public function test_admin_can_delete_an_asset(): void
+    {
+        $asset = Asset::factory()->create();
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $this->actingAs($admin)->delete('/assets/'.$asset->id)
+            ->assertRedirect('/assets')
+            ->assertSessionHas('success', 'Aset berhasil dihapus.');
+
+        $this->assertDatabaseMissing('assets', ['id' => $asset->id]);
+    }
+
+    public function test_viewer_cannot_delete_an_asset(): void
+    {
+        $asset = Asset::factory()->create();
+        $viewer = User::factory()->create(['role' => 'viewer']);
+
+        $this->actingAs($viewer)->delete('/assets/'.$asset->id)->assertForbidden();
+        $this->assertDatabaseHas('assets', ['id' => $asset->id]);
     }
 
     /** @return array<string, mixed> */

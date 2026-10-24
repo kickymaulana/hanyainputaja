@@ -73,6 +73,13 @@ class AssetController extends Controller
         return to_route('assets.show', $asset)->with('success', 'Aset berhasil diperbarui.');
     }
 
+    public function destroy(Asset $asset): RedirectResponse
+    {
+        $asset->delete();
+
+        return to_route('assets.index')->with('success', 'Aset berhasil dihapus.');
+    }
+
     /** @return array<string, mixed> */
     private function masterOptions(): array
     {
